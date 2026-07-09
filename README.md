@@ -1,192 +1,127 @@
-# Uncensore-LLM: Modelos Locales GGUF desde USB
-# =================================================================
+<div align="center">
 
-Uncensore-LLM ejecuta modelos de lenguaje locales (GGUF) directamente desde
-una memoria USB, sin instalación, sin GPU, sin internet.
+# Uncensored LLM
 
-## Caracteristicas
+Portable local LLM runtime — GGUF models from USB, zero install, zero internet
 
-- 100% local: inferencia en CPU via llama.cpp, sin dependencias externas
-- Zero-install: descarga el proyecto, ejecuta `./start.sh`, usa el modelo
-- Portable: funciona desde USB (exFAT), SSD externo o disco local
-- Multiplataforma: Linux (x86_64), macOS (Intel y Apple Silicon), Windows (x64)
-- Multi-modelo: 5 modelos incluidos, selector interactivo por RAM disponible
-- Interfaz web: servidor HTTP con chat UI en http://localhost:8080
-- API OpenAI-compatible: http://localhost:8080/v1
-- Privado: cero datos salen de tu maquina. Sin telemetria, sin cuentas
+![Status](https://img.shields.io/badge/status-Stable-28a745?style=flat-square)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+![Models](https://img.shields.io/badge/models-5_GGUF-6526d3?style=flat-square)
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square)
+![Updated](https://img.shields.io/github/last-commit/aentrepreneur/uncensored-llm?style=flat-square)
 
-## Requisitos minimos
+</div>
 
-| Componente | Minimo | Recomendado |
-|------------|--------|-------------|
-| RAM        | 4 GB   | 8 GB        |
-| USB        | 8 GB   | 32 GB+      |
-| CPU        | x86_64 con AVX2 (2013+) | Cualquier moderno |
-| SO         | Linux, macOS, Windows | - |
+## Overview
 
-## Uso rápido
+Run GGUF language models directly from a USB drive — no installation, no GPU, no internet. Powered by llama.cpp with a user-friendly RAM-aware model selector, OpenAI-compatible API, and web chat interface.
+
+## Features
+
+- **100% local**: CPU inference via llama.cpp, zero external dependencies
+- **Zero-install**: download the project, run `./start.sh`, use the model
+- **Portable**: works from USB (exFAT), external SSD, or local disk
+- **Cross-platform**: Linux (x86_64), macOS (Intel & Apple Silicon), Windows (x64)
+- **Multi-model**: 5 models included, interactive selector based on available RAM
+- **Web UI**: HTTP server with chat interface at `http://localhost:8080`
+- **OpenAI-compatible API**: `http://localhost:8080/v1`
+- **Private**: zero data leaves your machine. No telemetry, no accounts
+
+## Minimum Requirements
+
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| RAM | 4 GB | 8 GB |
+| USB | 8 GB | 32 GB+ |
+| CPU | x86_64 with AVX2 (2013+) | Any modern |
+| OS | Linux, macOS, Windows | — |
+
+## Quick Start
 
 ```bash
 ./start.sh
 ```
 
-Esto:
-1. Detecta RAM disponible
-2. Lista los modelos `.gguf` en `models/`
-3. Recomienda el modelo optimo segun RAM
-4. Muestra menu interactivo con descripciones y fichas tecnicas
-5. Lanza llama-server en http://localhost:8080
+This will:
+1. Detect available RAM
+2. List `.gguf` models in `models/`
+3. Recommend optimal model based on RAM
+4. Launch llama-server at `http://localhost:8080`
 
-**Windows:** Doble-click en `start.bat`
+**Windows:** Double-click `start.bat`
 
 ```bash
-# Probar la API
+# Test the API
 curl http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model":"gguf","messages":[{"role":"user","content":"Hola"}],"max_tokens":50}'
+  -d '{"model":"gguf","messages":[{"role":"user","content":"Hello"}],"max_tokens":50}'
 ```
 
-## Modelos incluidos
+## Included Models
 
-Los 5 modelos en `models/` suman ~9.8 GB. El selector recomienda segun RAM:
+5 models totaling ~9.8 GB. The selector recommends based on RAM:
 
-| Modelo | Archivo | Tamano | RAM | Contexto | Perfil |
-|--------|---------|--------|-----|----------|--------|
-| Gemma 2 2B (Google) | `gemma-2-2b.gguf` | 1.6 GB | 4 GB | 8K | Ligero, oficial |
-| Gemma 2 2B Abliterated | `gemma-2-2b-it-abliterated-Q4_K_M.gguf` | 1.6 GB | 4 GB | 8K | Sin censura |
-| Phi-3.5 Mini (Microsoft) | `Phi-3.5-mini-instruct-Q4_K_M.gguf` | 2.3 GB | 4 GB | 4K | Solido generalista |
-| Qwen Coder 3B (Alibaba) | `qwen2.5-coder-3b-instruct-q4_k_m.gguf` | 2.0 GB | 4 GB | 32K | Código y debug |
-| Phi-4 Mini (Microsoft) | `Phi-4-mini-instruct-Q4_K_M.gguf` | 2.4 GB | 4 GB | 128K | Calidad/precio |
+| Model | Size | RAM | Context | Profile |
+|-------|------|-----|---------|---------|
+| Gemma 2 2B (Google) | 1.6 GB | 4 GB | 8K | Lightweight, official |
+| Gemma 2 2B Abliterated | 1.6 GB | 4 GB | 8K | Uncensored variant |
+| Phi-3.5 Mini (Microsoft) | 2.3 GB | 4 GB | 4K | Solid generalist |
+| Qwen Coder 3B (Alibaba) | 2.0 GB | 4 GB | 32K | Code & debugging |
+| Phi-4 Mini (Microsoft) | 2.4 GB | 4 GB | 128K | Best quality/price |
 
 ```bash
-# Descargar modelos adicionales
+# Download additional models
 ./scripts/download-model.sh
 ```
 
-## Estructura del proyecto
+## Performance
 
-```
-uncensore-llm/
-├── models/             Modelos GGUF (descargar o colocar aqui)
-│   └── *.gguf          Quantizados Q4_K_M (~1.6-2.4 GB c/u)
-├── bin/                Binarios llama.cpp pre-compilados
-│   ├── llama-server    Servidor HTTP con chat UI
-│   ├── llama-cli       Interfaz de línea de comandos
-│   ├── llama-bench     Benchmark de rendimiento
-│   └── lib*.so         Librerias compartidas
-├── scripts/
-│   └── download-model.sh  Descarga modelos adicionales
-├── start.sh            Lanzador Linux/macOS
-├── start.bat           Lanzador Windows
-└── README.md           Este archivo
-```
+On modern CPU with AVX2:
 
-## Como funciona
-
-Usa [llama.cpp](https://github.com/ggml-org/llama.cpp) como motor de
-inferencia. `llama-server` es un ejecutable unico en C/C++ que:
-
-1. Carga el modelo GGUF en RAM
-2. Inicia un servidor HTTP compatible con API de OpenAI
-3. Sirve una interfaz web en http://localhost:8080
-
-No hay Python, Node, Docker ni GPU. Todo son binarios pre-compilados en `bin/`.
-
-start.sh gestiona todo: detecta RAM, lista modelos disponibles, recomienda
-segun recursos, lanza el servidor con `--no-jinja` y auto-kill del puerto
-8080, y muestra las URLs de acceso.
-
-## USB
-
-El proyecto esta disenado para ejecutarse directamente desde una memoria USB.
-Compatible con USB 3.0+ formateada como exFAT (recomendado) o ext4.
-
-### Requisitos de almacenamiento
-
-| Perfil | Contenido | USB minima |
-|--------|-----------|------------|
-| **Minimo** | Gemma 2 2B + binarios | 4 GB |
-| **Liviano** | Gemma 2 2B + Phi-4 Mini + binarios | 8 GB |
-| **Completo** | Todos los modelos + binarios | **16 GB** |
-
-### Preparar USB
-
-```bash
-# 1. Copiar el proyecto completo a la USB
-cp -r /opt/uncensore-llm /media/usb/
-
-# 2. Ejecutar desde la USB
-/media/usb/uncensore-llm/start.sh
-```
-
-### Notas para USB
-
-- **exFAT**: formatear como exFAT para compatibilidad Windows/Linux/macOS y
-  soporte de archivos de hasta 2.4 GB. Los binarios en `bin/` ya fueron
-  preparados sin symlinks para compatibilidad exFAT.
-- **Permisos**: en exFAT no se preservan permisos Unix. `start.sh` requiere
-  `+x`. Si usas Linux, ejecuta `chmod +x start.sh bin/llama-server` despues
-  de copiar. En Windows/macOS los permisos se manejan automaticamente.
-- **Modelos adicionales**: descarga modelos extras con `scripts/download-model.sh`
-  ANTES de copiar a la USB. No requiere internet en la maquina destino.
-- **Sesion persistente**: la ultima seleccion de modelo se guarda en `.model`.
-  En USB solo-lectura, el selector aparecera cada vez.
-
-## Rendimiento
-
-En CPU moderna con AVX2:
-
-| Modelo | Tokens/s | RAM en uso |
-|--------|----------|------------|
+| Model | Tokens/s | RAM Usage |
+|-------|----------|-----------|
 | Gemma 2 2B | ~15-25 | ~1 GB |
 | Phi-3.5 Mini | ~12-20 | ~1.5 GB |
 | Qwen Coder 3B | ~10-18 | ~1.3 GB |
 | Phi-4 Mini | ~10-18 | ~1.6 GB |
 
-Contexto por defecto: 4096 tokens (configurable con `-c` en start.sh).
+Default context: 4096 tokens (configurable via `-c` in start.sh).
 
-## API OpenAI-compatible
+## OpenAI-Compatible API
 
 ```python
 import openai
 client = openai.OpenAI(base_url="http://localhost:8080/v1", api_key="not-needed")
 response = client.chat.completions.create(
     model="gguf",
-    messages=[{"role": "user", "content": "Hola"}]
+    messages=[{"role": "user", "content": "Hello"}]
 )
 print(response.choices[0].message.content)
 ```
 
-Cualquier herramienta que soporte API de OpenAI puede apuntar a
-`http://localhost:8080/v1` y usar el modelo local.
+Any tool supporting the OpenAI API can point to `http://localhost:8080/v1` and use the local model.
 
-## Roadmap
+## USB Setup
 
-- [x] Selector interactivo de modelos con recomendación por RAM
-- [x] Auto-kill puerto 8080 en lanzamiento
-- [x] Modelos adicionales via download-model.sh
-- [ ] Web UI mejorada (streaming, markdown, historial)
-- [ ] Compilacion cruzada CI/CD para Windows, macOS, Linux
-- [ ] Script de abliteration automática para nuevos modelos
-- [ ] Empaquetado como ISO booteable
+```bash
+cp -r /opt/uncensored-llm /media/usb/
+cd /media/usb/uncensored-llm && ./start.sh
+```
 
-## Licencias
+| Profile | Content | Min USB |
+|---------|---------|---------|
+| **Minimal** | Gemma 2 2B + binaries | 4 GB |
+| **Light** | Gemma 2 2B + Phi-4 Mini | 8 GB |
+| **Complete** | All models | **16 GB** |
 
-- **Este proyecto**: MIT License
-- **llama.cpp**: MIT License
-- **Modelos**: Google Gemma License, Microsoft MIT, Alibaba Tongyi Qianwen LICENSE
-- **Modelo Abliterated**: Derivado de Gemma 2, misma licencia
+## License
 
-Ver archivo `LICENSE` para detalles.
+- This project: **MIT License**
+- llama.cpp: MIT License
+- Models: Google Gemma License, Microsoft MIT, Alibaba Tongyi Qianwen LICENSE
 
-## Disclaimer
+See `LICENSE` file for details.
 
-Este proyecto se proporciona con fines educativos y de investigación.
-Algunos modelos pueden generar contenido sin filtros de seguridad.
-El uso responsable es responsabilidad del usuario final.
+## Author
 
----
-
-Creado por Angel Esquivel (CyberSecurity) - [aentrepreneur](https://github.com/aentrepreneur)
-
-#End Development By Angel Esquivel (CyberSecurity) [uncensore-llm 2026]
+Angel Esquivel — [@aentrepreneur](https://github.com/aentrepreneur)
